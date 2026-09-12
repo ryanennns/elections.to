@@ -386,19 +386,21 @@ onUnmounted(() => {
           {{ dataError }} <button @click="reload">Reload</button>
         </div>
         <template v-if="data">
-          <section class="controls" aria-label="Map settings">
-            <ElectionDropdown
-              id="election"
-              label="Election"
-              :options="electionOptions"
-              :value="election"
-              @select="chooseElection"
-            />
-            <p class="scope-note">
-              {{ number(reportedAreas) }} reporting areas · Regular election-day
-              polls.
-            </p>
-          </section>
+          <Teleport to=".map-frame" :disabled="!mobile">
+            <section class="controls" aria-label="Map settings">
+              <ElectionDropdown
+                id="election"
+                label="Election"
+                :options="electionOptions"
+                :value="election"
+                @select="chooseElection"
+              />
+              <p class="scope-note">
+                {{ number(reportedAreas) }} reporting areas · Regular election-day
+                polls.
+              </p>
+            </section>
+          </Teleport>
 
           <Teleport to="body" :disabled="!mobile">
             <section

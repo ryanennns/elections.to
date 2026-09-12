@@ -566,6 +566,25 @@ h3 {
   .controls {
     padding: 19px 22px;
   }
+  .map-frame > .controls {
+    position: absolute;
+    z-index: 2;
+    top: 14px;
+    left: 14px;
+    width: min(260px, calc(100% - 28px));
+    padding: 0;
+    border: 0;
+  }
+  .map-frame > .controls .dropdown-label,
+  .map-frame > .controls .scope-note {
+    display: none;
+  }
+  .map-frame > .controls .dropdown-native {
+    height: auto;
+    padding: 0 20px 0 0;
+    border: 0;
+    background: transparent;
+  }
   .map-column {
     display: contents;
   }
