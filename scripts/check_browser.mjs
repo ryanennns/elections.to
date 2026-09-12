@@ -27,6 +27,10 @@ try {
   const page = await browser.newPage({
     viewport: { width: 1440, height: 1000 },
   });
+  const chooseElection = async (page, label) => {
+    await page.getByRole("button", { name: /^Election/ }).click();
+    await page.getByRole("option", { name: label, exact: true }).click();
+  };
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto(url);
@@ -38,23 +42,25 @@ try {
     await page.getByRole("button", { name: "Zoom out", exact: true }).click();
   await expect(page.locator(".maplibregl-ctrl-scale")).toContainText("5 km");
   await page.getByRole("button", { name: "Reset view" }).click();
-  await page.selectOption("#election", "2022");
+  await page.getByRole("button", { name: /^Election/ }).click();
+  await page.keyboard.press("ArrowDown");
+  await page.keyboard.press("Enter");
   await expect(page.locator(".total strong")).toHaveText("551,890");
   await expect(page.locator(".outcome")).toContainText("John Tory elected");
-  await page.selectOption("#election", "2023");
+  await chooseElection(page, "2023 · Mayoral by-election");
   await expect(page.locator(".total strong")).toHaveText("724,638");
-  await page.selectOption("#election", "2018");
+  await chooseElection(page, "2018 · Municipal election");
   await expect(page.locator(".total strong")).toHaveText("755,493");
-  await page.selectOption("#election", "2023");
-  await page.selectOption("#election", "2014");
+  await chooseElection(page, "2023 · Mayoral by-election");
+  await chooseElection(page, "2014 · Municipal election");
   await expect(page.locator(".outcome")).toContainText("John Tory elected");
-  await page.selectOption("#election", "2010");
+  await chooseElection(page, "2010 · Municipal election");
   await expect(page.locator(".outcome")).toContainText("Rob Ford elected");
   await page.waitForTimeout(1000);
   await page.screenshot({ path: "test-results/2010.png" });
-  await page.selectOption("#election", "2006");
+  await chooseElection(page, "2006 · Municipal election");
   await expect(page.locator(".outcome")).toContainText("David Miller elected");
-  await page.selectOption("#election", "2023");
+  await chooseElection(page, "2023 · Mayoral by-election");
   await page.waitForTimeout(6000);
   await page.screenshot({ path: "test-results/desktop.png" });
   const box = await page.locator(".map").boundingBox();
@@ -83,6 +89,11 @@ try {
   });
   await expect(mobile.locator(".results")).toBeVisible();
   await expect(mobile.locator(".candidate-list li")).toHaveCount(3);
+  await expect(mobile.locator("select#election")).toBeVisible();
+  await mobile.selectOption("select#election", "2022");
+  await expect(mobile.locator(".total strong")).toHaveText("551,890");
+  await mobile.selectOption("select#election", "2023");
+  await expect(mobile.locator(".total strong")).toHaveText("724,638");
   await mobile.getByRole("button", { name: "Hide results" }).click();
   await expect(mobile.getByRole("button", { name: "Results" })).toBeVisible();
   await mobile.getByRole("button", { name: "Results" }).click();

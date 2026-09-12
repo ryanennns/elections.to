@@ -4,6 +4,7 @@ import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import { candidateColor } from "./colors.js";
+import ElectionDropdown from "./components/ElectionDropdown.vue";
 
 maplibregl.setWorkerUrl(workerUrl);
 
@@ -20,11 +21,26 @@ const mapError = ref("");
 const mapReady = ref(false);
 const mobile = ref(false);
 const resultsOpen = ref(true);
+const MAP_FADE_DURATION = 195;
+const MAP_LAYERS = [
+  ["subdivisions-fill", "fill-opacity", 0.88],
+  ["subdivisions-boundary", "line-opacity", 0.72],
+  ["subdivisions-selection", "line-opacity", 0.96],
+];
 const TORONTO_BOUNDS = [
   [-79.9, 43.25],
   [-78.85, 44.15],
 ];
+const electionOptions = [
+  { value: "2023", label: "2023 · Mayoral by-election" },
+  { value: "2022", label: "2022 · Municipal election" },
+  { value: "2018", label: "2018 · Municipal election" },
+  { value: "2014", label: "2014 · Municipal election" },
+  { value: "2010", label: "2010 · Municipal election" },
+  { value: "2006", label: "2006 · Municipal election" },
+];
 let map;
+let mapUpdate;
 let disposed = false;
 const color = candidateColor;
 const number = (n) => n.toLocaleString("en-CA");
@@ -91,12 +107,34 @@ function highlight() {
     selected.value,
   ]);
 }
+function setMapOpacity(multiplier) {
+  if (!mapReady.value) return;
+  for (const [layer, property, opacity] of MAP_LAYERS) {
+    if (map.getLayer(layer)) map.setPaintProperty(layer, property, opacity * multiplier);
+  }
+}
 function resetView() {
   selected.value = "";
   map?.fitBounds(TORONTO_BOUNDS, { padding: 35, duration: 600 });
 }
 function reload() {
   window.location.reload();
+}
+function chooseElection(value) {
+  if (value === election.value) return;
+  election.value = value;
+  data.value = elections.value[value];
+  geometry.value = geometries.value[value];
+  selected.value = "";
+  clearTimeout(mapUpdate);
+  if (!mapReady.value) return;
+  setMapOpacity(0);
+  mapUpdate = setTimeout(() => {
+    if (disposed) return;
+    map.getSource("subdivisions").setData(geometry.value.subdivisions);
+    paint();
+    setMapOpacity(1);
+  }, MAP_FADE_DURATION);
 }
 async function read(url) {
   const response = await fetch(url, { signal: AbortSignal.timeout(20000) });
@@ -253,6 +291,7 @@ onMounted(async () => {
                 ],
               ],
               "fill-opacity": 0.88,
+              "fill-opacity-transition": { duration: MAP_FADE_DURATION },
             },
           },
           roadLayer,
@@ -265,6 +304,7 @@ onMounted(async () => {
             paint: {
               "line-color": "#435248",
               "line-opacity": 0.72,
+              "line-opacity-transition": { duration: MAP_FADE_DURATION },
               "line-width": group === "wards" ? 1.8 : 0.9,
             },
           },
@@ -279,6 +319,7 @@ onMounted(async () => {
           paint: {
             "line-color": "#19352f",
             "line-opacity": 0.96,
+            "line-opacity-transition": { duration: MAP_FADE_DURATION },
             "line-width": 4,
           },
         });
@@ -309,23 +350,13 @@ onMounted(async () => {
       "The map could not start. Election results remain available.";
   }
 });
-watch(election, () => {
-  console.log("election", election);
-
-  data.value = elections.value[election.value];
-  geometry.value = geometries.value[election.value];
-  selected.value = "";
-  if (mapReady.value) {
-    map.getSource("subdivisions").setData(geometry.value.subdivisions);
-    paint();
-  }
-});
 watch(selected, (value) => {
   highlight();
   if (value && mobile.value) resultsOpen.value = true;
 });
 onUnmounted(() => {
   disposed = true;
+  clearTimeout(mapUpdate);
   window.removeEventListener("resize", updateMobile);
   map?.remove();
 });
@@ -353,15 +384,13 @@ onUnmounted(() => {
         </div>
         <template v-if="data">
           <section class="controls" aria-label="Map settings">
-            <label for="election">Election</label>
-            <select id="election" v-model="election">
-              <option value="2023">2023 · Mayoral by-election</option>
-              <option value="2022">2022 · Municipal election</option>
-              <option value="2018">2018 · Municipal election</option>
-              <option value="2014">2014 · Municipal election</option>
-              <option value="2010">2010 · Municipal election</option>
-              <option value="2006">2006 · Municipal election</option>
-            </select>
+            <ElectionDropdown
+              id="election"
+              label="Election"
+              :options="electionOptions"
+              :value="election"
+              @select="chooseElection"
+            />
             <p class="scope-note">
               {{ number(reportedAreas) }} reporting areas · Regular election-day
               polls.
