@@ -579,11 +579,22 @@ h3 {
   .map-frame > .controls .scope-note {
     display: none;
   }
+  .map-frame > .controls .dropdown::after {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    color: #203b34;
+    content: "▾";
+    pointer-events: none;
+    transform: translateY(-50%);
+  }
   .map-frame > .controls .dropdown-native {
     height: auto;
     padding: 0 20px 0 0;
     border: 0;
     background: transparent;
+    appearance: none;
+    -webkit-appearance: none;
   }
   .map-column {
     display: contents;
