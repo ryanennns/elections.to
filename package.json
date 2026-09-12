@@ -1,0 +1,28 @@
+{
+  "name": "toronto-election-map",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "data:prepare": "python3 scripts/prepare_data.py",
+    "lint": "eslint .",
+    "test": "python3 scripts/check_data.py && node scripts/check_colors.mjs",
+    "test:browser": "node scripts/check_browser.mjs"
+  },
+  "dependencies": {
+    "maplibre-gl": "^6.9.0",
+    "vue": "^3.5.42"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "eslint": "^10.10.0",
+    "eslint-plugin-vue": "^10.11.0",
+    "globals": "^17.12.0",
+    "vite": "^8.3.0",
+    "xlsx": "^0.18.5"
+  }
+}
