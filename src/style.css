@@ -663,6 +663,8 @@ h3 {
     backdrop-filter: blur(12px);
   }
   .results.is-collapsed {
+    left: auto;
+    right: 14px;
     width: auto;
     padding: 0;
     overflow: visible;
@@ -680,6 +682,27 @@ h3 {
     background: #ffffffb8;
     font-size: 10px;
     font-weight: 700;
+  }
+  .results-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .results-heading h3 {
+    min-width: 0;
+    flex: 1;
+  }
+  .results-heading .results-toggle {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    flex-shrink: 0;
+    margin: 0;
+    font-size: 18px;
+    line-height: 1;
   }
   .is-collapsed .results-toggle {
     margin: 0;

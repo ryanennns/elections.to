@@ -408,15 +408,19 @@ onUnmounted(() => {
               class="results"
               :class="{ 'is-collapsed': !resultsOpen }"
             >
-              <button
-                v-if="mobile"
-                class="results-toggle"
-                :aria-expanded="resultsOpen"
-                @click="resultsOpen = !resultsOpen"
-              >
-                {{ resultsOpen ? "Hide results" : "Results" }}
-              </button>
               <div v-show="resultsOpen || !mobile" class="results-content">
+                <div class="results-heading">
+                  <h3 v-if="selected">{{ heading }}</h3>
+                  <button
+                    v-if="mobile"
+                    class="results-toggle"
+                    :aria-expanded="resultsOpen"
+                    aria-label="Hide results"
+                    @click="resultsOpen = !resultsOpen"
+                  >
+                    <span aria-hidden="true">⌄</span>
+                  </button>
+                </div>
                 <button
                   v-if="selected"
                   class="text-button clear-button"
@@ -424,7 +428,6 @@ onUnmounted(() => {
                 >
                   Clear
                 </button>
-                <h3 v-if="selected">{{ heading }}</h3>
                 <p class="outcome" aria-live="polite">
                   <i
                     :style="{
@@ -477,6 +480,14 @@ onUnmounted(() => {
                   voting method.
                 </p>
               </div>
+              <button
+                v-if="mobile && !resultsOpen"
+                class="results-toggle"
+                :aria-expanded="resultsOpen"
+                @click="resultsOpen = !resultsOpen"
+              >
+                Results
+              </button>
             </section>
           </Teleport>
         </template>
