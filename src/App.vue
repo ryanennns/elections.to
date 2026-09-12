@@ -22,11 +22,6 @@ const mapReady = ref(false);
 const mobile = ref(false);
 const resultsOpen = ref(true);
 const MAP_FADE_DURATION = 195;
-const MAP_LAYERS = [
-  ["subdivisions-fill", "fill-opacity", 0.88],
-  ["subdivisions-boundary", "line-opacity", 0.72],
-  ["subdivisions-selection", "line-opacity", 0.96],
-];
 const TORONTO_BOUNDS = [
   [-79.9, 43.25],
   [-78.85, 44.15],
@@ -107,11 +102,9 @@ function highlight() {
     selected.value,
   ]);
 }
-function setMapOpacity(multiplier) {
+function setBlackOpacity(opacity) {
   if (!mapReady.value) return;
-  for (const [layer, property, opacity] of MAP_LAYERS) {
-    if (map.getLayer(layer)) map.setPaintProperty(layer, property, opacity * multiplier);
-  }
+  map.setPaintProperty("subdivisions-black", "fill-opacity", opacity);
 }
 function resetView() {
   selected.value = "";
@@ -128,12 +121,12 @@ function chooseElection(value) {
   selected.value = "";
   clearTimeout(mapUpdate);
   if (!mapReady.value) return;
-  setMapOpacity(0);
+  setBlackOpacity(1);
   mapUpdate = setTimeout(() => {
     if (disposed) return;
     map.getSource("subdivisions").setData(geometry.value.subdivisions);
     paint();
-    setMapOpacity(1);
+    setBlackOpacity(0);
   }, MAP_FADE_DURATION);
 }
 async function read(url) {
@@ -291,6 +284,18 @@ onMounted(async () => {
                 ],
               ],
               "fill-opacity": 0.88,
+            },
+          },
+          roadLayer,
+        );
+        map.addLayer(
+          {
+            id: "subdivisions-black",
+            type: "fill",
+            source: group,
+            paint: {
+              "fill-color": "#888",
+              "fill-opacity": 0,
               "fill-opacity-transition": { duration: MAP_FADE_DURATION },
             },
           },
@@ -304,7 +309,6 @@ onMounted(async () => {
             paint: {
               "line-color": "#435248",
               "line-opacity": 0.72,
-              "line-opacity-transition": { duration: MAP_FADE_DURATION },
               "line-width": group === "wards" ? 1.8 : 0.9,
             },
           },
@@ -319,7 +323,6 @@ onMounted(async () => {
           paint: {
             "line-color": "#19352f",
             "line-opacity": 0.96,
-            "line-opacity-transition": { duration: MAP_FADE_DURATION },
             "line-width": 4,
           },
         });
