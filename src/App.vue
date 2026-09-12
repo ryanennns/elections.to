@@ -409,18 +409,7 @@ onUnmounted(() => {
               :class="{ 'is-collapsed': !resultsOpen }"
             >
               <div v-show="resultsOpen || !mobile" class="results-content">
-                <div class="results-heading">
-                  <h3 v-if="selected">{{ heading }}</h3>
-                  <button
-                    v-if="mobile"
-                    class="results-toggle"
-                    :aria-expanded="resultsOpen"
-                    aria-label="Hide results"
-                    @click="resultsOpen = !resultsOpen"
-                  >
-                    <span aria-hidden="true">⌄</span>
-                  </button>
-                </div>
+                <h3 v-if="selected">{{ heading }}</h3>
                 <button
                   v-if="selected"
                   class="text-button clear-button"
@@ -438,6 +427,15 @@ onUnmounted(() => {
                     }"
                   ></i
                   >{{ outcome }}
+                  <button
+                    v-if="mobile"
+                    class="results-toggle"
+                    :aria-expanded="resultsOpen"
+                    aria-label="Hide results"
+                    @click="resultsOpen = !resultsOpen"
+                  >
+                    <span aria-hidden="true">⌄</span>
+                  </button>
                 </p>
                 <template v-if="result">
                   <div class="total">
