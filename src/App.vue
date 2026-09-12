@@ -243,10 +243,6 @@ onMounted(async () => {
       }),
       "bottom-right",
     );
-    map.addControl(
-      new maplibregl.ScaleControl({ unit: "metric" }),
-      "bottom-left",
-    );
     map.on("error", () => {
       mapError.value =
         "Some map resources could not load. Results remain available; reload to retry.";
@@ -408,76 +404,75 @@ onUnmounted(() => {
               class="results"
               :class="{ 'is-collapsed': !resultsOpen }"
             >
-              <div v-show="resultsOpen || !mobile" class="results-content">
-                <h3 v-if="selected">{{ heading }}</h3>
-                <button
-                  v-if="selected"
-                  class="text-button clear-button"
-                  @click="selected = ''"
+              <Transition name="results-modal">
+                <div
+                  v-show="resultsOpen || !mobile"
+                  :aria-hidden="!resultsOpen"
+                  class="results-content"
                 >
-                  Clear
-                </button>
-                <p class="outcome" aria-live="polite">
-                  <i
-                    :style="{
-                      background:
-                        result?.leaders.length === 1
-                          ? color(data.candidates[result.leaders[0]])
-                          : '#6b626c',
-                    }"
-                  ></i
-                  >{{ outcome }}
-                  <button
-                    v-if="mobile"
-                    class="results-toggle"
-                    :aria-expanded="resultsOpen"
-                    aria-label="Hide results"
-                    @click="resultsOpen = !resultsOpen"
-                  >
-                    <span aria-hidden="true">⌄</span>
-                  </button>
-                </p>
-                <template v-if="result">
-                  <div class="total">
-                    <strong>{{ number(result.total) }}</strong
-                    ><span>valid votes</span>
-                  </div>
-                  <p v-if="selected" class="result-scope">
-                    Regular election-day votes only
+                  <h3 v-if="selected">{{ heading }}</h3>
+                  <p class="outcome" aria-live="polite">
+                    <i
+                      :style="{
+                        background:
+                          result?.leaders.length === 1
+                            ? color(data.candidates[result.leaders[0]])
+                            : '#6b626c',
+                      }"
+                    ></i
+                    >{{ outcome }}
+                    <button
+                      v-if="mobile"
+                      class="results-toggle"
+                      :aria-expanded="resultsOpen"
+                      aria-label="Hide results"
+                      @click="resultsOpen = !resultsOpen"
+                    >
+                      <span aria-hidden="true">⌄</span>
+                    </button>
                   </p>
-                  <div class="table-heading">
-                    <span>CANDIDATE</span><span>VOTES / SHARE</span>
-                  </div>
-                  <ol class="candidate-list">
-                    <li v-for="c in displayed" :key="c.id">
-                      <div class="candidate-row">
-                        <span class="candidate-name"
-                          ><i :style="{ background: color(c) }"></i
-                          >{{ c.name }}</span
-                        ><span class="candidate-numbers"
-                          >{{ number(result.votes[c.id]) }}
-                          <strong>{{
-                            percent(result.votes[c.id], result.total)
-                          }}</strong></span
-                        >
-                      </div>
-                      <div class="vote-track">
-                        <span
-                          :style="{
-                            width: `${result.total ? (result.votes[c.id] / result.total) * 100 : 0}%`,
-                            background: color(c),
-                          }"
-                        ></span>
-                      </div>
-                    </li>
-                  </ol>
-                </template>
-                <p v-else class="missing-copy">
-                  This polygon has no separately reported result. It is not a
-                  zero-vote area. Select its ward to see totals including every
-                  voting method.
-                </p>
-              </div>
+                  <template v-if="result">
+                    <div class="total">
+                      <strong>{{ number(result.total) }}</strong
+                      ><span>valid votes</span>
+                    </div>
+                    <p v-if="selected" class="result-scope">
+                      Regular election-day votes only
+                    </p>
+                    <div class="table-heading">
+                      <span>CANDIDATE</span><span>VOTES / SHARE</span>
+                    </div>
+                    <ol class="candidate-list">
+                      <li v-for="c in displayed" :key="c.id">
+                        <div class="candidate-row">
+                          <span class="candidate-name"
+                            ><i :style="{ background: color(c) }"></i
+                            >{{ c.name }}</span
+                          ><span class="candidate-numbers"
+                            >{{ number(result.votes[c.id]) }}
+                            <strong>{{
+                              percent(result.votes[c.id], result.total)
+                            }}</strong></span
+                          >
+                        </div>
+                        <div class="vote-track">
+                          <span
+                            :style="{
+                              width: `${result.total ? (result.votes[c.id] / result.total) * 100 : 0}%`,
+                              background: color(c),
+                            }"
+                          ></span>
+                        </div>
+                      </li>
+                    </ol>
+                  </template>
+                  <p v-else class="missing-copy">
+                    This polygon has no separately reported result. It is not a
+                    zero-vote area. Select its ward to see totals including every
+                    voting method.
+                  </p>
+                </div>
+              </Transition>
               <button
                 v-if="mobile && !resultsOpen"
                 class="results-toggle"

@@ -250,16 +250,6 @@ h3 {
   display: block;
   height: 100%;
 }
-.text-button {
-  background: none;
-  border: 0;
-  text-decoration: underline;
-  font-size: 10px;
-}
-.clear-button {
-  display: block;
-  margin: 0 0 16px auto;
-}
 .missing-copy {
   font-size: 12px;
   line-height: 1.8;
@@ -350,12 +340,6 @@ h3 {
 .maplibregl-ctrl-group button {
   width: 36px;
   height: 36px;
-}
-.maplibregl-ctrl-scale {
-  margin-left: 24px !important;
-  font-size: 9px;
-  background: #ffffff80;
-  border-color: #596757;
 }
 .legend {
   position: absolute;
@@ -662,6 +646,25 @@ h3 {
     background: #fbfcf8d9;
     box-shadow: 0 8px 28px #203b3426;
     backdrop-filter: blur(12px);
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+  .results-modal-enter-active,
+  .results-modal-leave-active {
+    transition:
+      opacity 180ms ease,
+      transform 180ms ease;
+  }
+  .results-modal-enter-from,
+  .results-modal-leave-to {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+    transform-origin: bottom right;
+  }
+  .results-modal-leave-active .results-toggle {
+    visibility: hidden;
   }
   .results.is-collapsed {
     left: auto;
@@ -702,9 +705,6 @@ h3 {
   .is-collapsed .results-toggle {
     margin: 0;
     box-shadow: 0 2px 8px #203b341f;
-  }
-  .results .clear-button {
-    margin-bottom: 10px;
   }
   .results .total strong {
     font-size: 27px;
@@ -750,5 +750,10 @@ h3 {
 @media (prefers-reduced-motion: reduce) {
   * {
     scroll-behavior: auto !important;
+  }
+  .results,
+  .results-modal-enter-active,
+  .results-modal-leave-active {
+    transition: none !important;
   }
 }

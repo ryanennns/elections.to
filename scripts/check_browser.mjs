@@ -40,7 +40,6 @@ try {
   });
   for (let i = 0; i < 5; i++)
     await page.getByRole("button", { name: "Zoom out", exact: true }).click();
-  await expect(page.locator(".maplibregl-ctrl-scale")).toContainText("5 km");
   await page.getByRole("button", { name: "Reset view" }).click();
   await page.getByRole("button", { name: /^Election/ }).click();
   await page.keyboard.press("ArrowDown");
@@ -95,8 +94,10 @@ try {
   await mobile.selectOption("select#election", "2023");
   await expect(mobile.locator(".total strong")).toHaveText("724,638");
   await mobile.getByRole("button", { name: "Hide results" }).click();
-  await expect(mobile.getByRole("button", { name: "Results" })).toBeVisible();
-  await mobile.getByRole("button", { name: "Results" }).click();
+  await expect(
+    mobile.getByRole("button", { name: "Results", exact: true }),
+  ).toBeVisible();
+  await mobile.getByRole("button", { name: "Results", exact: true }).click();
   assert.equal(
     await mobile.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
