@@ -650,7 +650,8 @@ h3 {
   .results {
     position: fixed;
     z-index: 3;
-    left: 14px;
+    left: auto;
+    right: 14px;
     bottom: 14px;
     width: min(320px, calc(100vw - 28px));
     max-height: min(62dvh, 460px);
