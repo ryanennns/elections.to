@@ -24,6 +24,7 @@ const mobile = ref(false);
 const resultsOpen = ref(true);
 const resultsCollapsed = ref(false);
 const resultsOpening = ref(false);
+const closingSelection = ref("");
 const MAP_FADE_DURATION = 195;
 const TORONTO_BOUNDS = [
   [-79.9, 43.25],
@@ -56,15 +57,22 @@ const scopeNote = computed(() =>
     ? "Citywide mayoral result · no polling-area data"
     : `${number(reportedAreas.value)} reporting areas · Regular election-day polls.`,
 );
-const area = computed(() => areas.value.find((f) => f.id === selected.value));
+const displaySelection = computed(
+  () => selected.value || closingSelection.value,
+);
+const area = computed(() =>
+  areas.value.find((f) => f.id === displaySelection.value),
+);
 const result = computed(() =>
-  selected.value ? data.value?.subdivisions[selected.value] : data.value?.city,
+  displaySelection.value
+    ? data.value?.subdivisions[displaySelection.value]
+    : data.value?.city,
 );
 const voterStats = computed(() => {
   const stats = voterStatistics.value[election.value];
   return stats
-    ? selected.value
-      ? stats.subdivisions[selected.value]
+    ? displaySelection.value
+      ? stats.subdivisions[displaySelection.value]
       : stats.city
     : null;
 });
@@ -87,7 +95,7 @@ const outcome = computed(() => {
   return names.length > 1
     ? `Tie · ${names.join(" & ")}`
     : names.length
-      ? `${names[0]} ${selected.value ? "leads" : "elected"}`
+      ? `${names[0]} ${displaySelection.value ? "leads" : "elected"}`
       : "No valid votes";
 });
 
@@ -165,7 +173,8 @@ function updateMobile() {
 }
 function toggleResults() {
   if (resultsOpen.value) {
-    resultsOpen.value = false;
+    if (selected.value) selected.value = "";
+    else resultsOpen.value = false;
   } else {
     resultsCollapsed.value = false;
     resultsOpening.value = true;
@@ -175,6 +184,7 @@ function toggleResults() {
 }
 function collapseResults() {
   if (mobile.value && !resultsOpen.value) resultsCollapsed.value = true;
+  closingSelection.value = "";
 }
 
 onMounted(async () => {
@@ -413,9 +423,11 @@ onMounted(async () => {
       "The map could not start. Election results remain available.";
   }
 });
-watch(selected, (value) => {
+watch(selected, (value, previous) => {
   highlight();
-  if (value && mobile.value) resultsOpen.value = true;
+  if (!value && previous && mobile.value) closingSelection.value = previous;
+  if (!mobile.value || resultsOpen.value === Boolean(value)) return;
+  toggleResults();
 });
 onUnmounted(() => {
   disposed = true;
@@ -477,7 +489,7 @@ onUnmounted(() => {
                   :aria-hidden="!resultsOpen"
                   class="results-content"
                 >
-                  <h3 v-if="selected">{{ heading }}</h3>
+                  <h3 v-if="displaySelection">{{ heading }}</h3>
                   <p class="outcome" aria-live="polite">
                     <i
                       :style="{
@@ -508,7 +520,7 @@ onUnmounted(() => {
                       {{ percent(voterStats.voted, voterStats.eligible) }}
                       turnout
                     </p>
-                    <p v-if="selected" class="result-scope">
+                    <p v-if="displaySelection" class="result-scope">
                       Regular election-day votes only
                     </p>
                     <div class="table-heading">

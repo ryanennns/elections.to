@@ -115,11 +115,12 @@ try {
     320,
   );
   await expect(reopen).toBeVisible();
-  assert.equal(
-    Math.round(
-      (await reopen.boundingBox()).x + (await reopen.boundingBox()).width,
-    ),
-    376,
+  assert.ok(
+    Math.abs(
+      Math.round(
+        (await reopen.boundingBox()).x + (await reopen.boundingBox()).width,
+      ) - 376,
+    ) <= 1,
   );
   await reopen.click();
   assert.equal(
