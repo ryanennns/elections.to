@@ -22,6 +22,8 @@ const mapError = ref("");
 const mapReady = ref(false);
 const mobile = ref(false);
 const resultsOpen = ref(true);
+const resultsCollapsed = ref(false);
+const resultsOpening = ref(false);
 const MAP_FADE_DURATION = 195;
 const TORONTO_BOUNDS = [
   [-79.9, 43.25],
@@ -142,12 +144,12 @@ function chooseElection(value) {
   setBlackOpacity(1);
   mapUpdate = setTimeout(() => {
     if (disposed) return;
-    map
-      .getSource("subdivisions")
-      .setData(geometry.value?.subdivisions || {
+    map.getSource("subdivisions").setData(
+      geometry.value?.subdivisions || {
         type: "FeatureCollection",
         features: [],
-      });
+      },
+    );
     paint();
     setBlackOpacity(0);
   }, MAP_FADE_DURATION);
@@ -160,6 +162,19 @@ async function read(url) {
 
 function updateMobile() {
   mobile.value = window.matchMedia("(max-width: 760px)").matches;
+}
+function toggleResults() {
+  if (resultsOpen.value) {
+    resultsOpen.value = false;
+  } else {
+    resultsCollapsed.value = false;
+    resultsOpening.value = true;
+    resultsOpen.value = true;
+    requestAnimationFrame(() => (resultsOpening.value = false));
+  }
+}
+function collapseResults() {
+  if (mobile.value && !resultsOpen.value) resultsCollapsed.value = true;
 }
 
 onMounted(async () => {
@@ -450,9 +465,13 @@ onUnmounted(() => {
             <section
               id="results"
               class="results"
-              :class="{ 'is-collapsed': !resultsOpen }"
+              :class="{
+                'is-closing': !resultsOpen && !resultsCollapsed,
+                'is-opening': resultsOpening,
+                'is-collapsed': resultsCollapsed,
+              }"
             >
-              <Transition name="results-modal">
+              <Transition name="results-modal" @after-leave="collapseResults">
                 <div
                   v-show="resultsOpen || !mobile"
                   :aria-hidden="!resultsOpen"
@@ -474,7 +493,7 @@ onUnmounted(() => {
                       class="results-toggle"
                       :aria-expanded="resultsOpen"
                       aria-label="Hide results"
-                      @click="resultsOpen = !resultsOpen"
+                      @click="toggleResults"
                     >
                       <span aria-hidden="true">⌄</span>
                     </button>
@@ -486,7 +505,8 @@ onUnmounted(() => {
                     </div>
                     <p v-if="voterStats" class="result-scope">
                       {{ number(voterStats.voted) }} voted ·
-                      {{ percent(voterStats.voted, voterStats.eligible) }} turnout
+                      {{ percent(voterStats.voted, voterStats.eligible) }}
+                      turnout
                     </p>
                     <p v-if="selected" class="result-scope">
                       Regular election-day votes only
@@ -520,8 +540,8 @@ onUnmounted(() => {
                   </template>
                   <p v-else class="missing-copy">
                     This polygon has no separately reported result. It is not a
-                    zero-vote area. Select its ward to see totals including every
-                    voting method.
+                    zero-vote area. Select its ward to see totals including
+                    every voting method.
                   </p>
                 </div>
               </Transition>
@@ -529,7 +549,7 @@ onUnmounted(() => {
                 v-if="mobile && !resultsOpen"
                 class="results-toggle"
                 :aria-expanded="resultsOpen"
-                @click="resultsOpen = !resultsOpen"
+                @click="toggleResults"
               >
                 Results
               </button>

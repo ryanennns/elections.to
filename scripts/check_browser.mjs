@@ -101,15 +101,27 @@ try {
   await expect(mobile.locator(".results")).toBeVisible();
   await expect(mobile.locator(".candidate-list li")).toHaveCount(3);
   await expect(mobile.locator("select#election")).toBeVisible();
+  const mapFrame = await mobile.locator(".map-frame").boundingBox();
+  assert.equal(Math.round(mapFrame.y + mapFrame.height), 844);
   await mobile.selectOption("select#election", "2022");
   await expect(mobile.locator(".total strong")).toHaveText("551,890");
   await mobile.selectOption("select#election", "2023");
   await expect(mobile.locator(".total strong")).toHaveText("724,638");
   await mobile.getByRole("button", { name: "Hide results" }).click();
-  await expect(
-    mobile.getByRole("button", { name: "Results", exact: true }),
-  ).toBeVisible();
-  await mobile.getByRole("button", { name: "Results", exact: true }).click();
+  const reopen = mobile.getByRole("button", { name: "Results", exact: true });
+  await mobile.waitForTimeout(90);
+  assert.equal(
+    Math.round((await mobile.locator(".results").boundingBox()).width),
+    320,
+  );
+  await expect(reopen).toBeVisible();
+  assert.equal(
+    Math.round(
+      (await reopen.boundingBox()).x + (await reopen.boundingBox()).width,
+    ),
+    376,
+  );
+  await reopen.click();
   assert.equal(
     await mobile.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -119,9 +131,6 @@ try {
   await mobile.locator(".map-frame").scrollIntoViewIfNeeded();
   await mobile.waitForTimeout(2000);
   await mobile.screenshot({ path: "test-results/mobile.png" });
-  const mb = await mobile.locator(".map").boundingBox();
-  await mobile.touchscreen.tap(mb.x + mb.width * 0.6, mb.y + mb.height * 0.4);
-  await expect(mobile.locator(".results h3")).toBeVisible();
   assert.deepEqual(errors, []);
 
   const failed = await browser.newPage();

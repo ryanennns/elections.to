@@ -77,6 +77,8 @@ i {
 main {
   display: grid;
   grid-template-columns: 364px minmax(0, 1fr);
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 .sidebar {
   background: #fbfcf8;
@@ -585,7 +587,9 @@ h3 {
   }
   .map-frame {
     order: 1;
-    height: 590px;
+    flex: 1;
+    height: auto;
+    min-height: 0;
     max-height: none;
   }
   .results {
@@ -653,7 +657,8 @@ h3 {
     transition:
       background-color 180ms ease,
       border-color 180ms ease,
-      box-shadow 180ms ease;
+      box-shadow 180ms ease,
+      backdrop-filter 180ms ease;
   }
   .results-modal-enter-active,
   .results-modal-leave-active {
@@ -669,6 +674,13 @@ h3 {
   }
   .results-modal-leave-active .results-toggle {
     visibility: hidden;
+  }
+  .results.is-closing,
+  .results.is-opening {
+    background-color: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    backdrop-filter: blur(0);
   }
   .results.is-collapsed {
     left: auto;
@@ -691,6 +703,9 @@ h3 {
     font-size: 10px;
     font-weight: 700;
   }
+  .results > .results-toggle {
+    display: none;
+  }
   .outcome .results-toggle {
     display: grid;
     place-items: center;
@@ -706,7 +721,11 @@ h3 {
     font-size: 18px;
     line-height: 1;
   }
-  .is-collapsed .results-toggle {
+  .is-collapsed > .results-toggle {
+    display: block;
+    position: absolute;
+    right: 0;
+    bottom: 0;
     margin: 0;
     box-shadow: 0 2px 8px #203b341f;
   }
