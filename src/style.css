@@ -719,19 +719,25 @@ h3 {
     transition: opacity 300ms ease;
   }
   .outcome .results-toggle {
+    position: absolute;
+    top: 14px;
+    right: 14px;
     display: grid;
     place-items: center;
     width: 28px;
     height: 28px;
     padding: 0;
-    flex-shrink: 0;
-    margin: -5px 0 -5px auto;
+    margin: 0;
     border: 0;
     border-radius: 0;
     background: transparent;
     box-shadow: none;
     font-size: 18px;
     line-height: 1;
+  }
+  .results h3,
+  .results .outcome {
+    padding-right: 34px;
   }
   .is-collapsed > .results-toggle {
     margin: 0;
