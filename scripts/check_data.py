@@ -92,3 +92,11 @@ assert {f['id'] for f in old_geo} <= set(old['subdivisions'])
 for area in old['subdivisions'].values():
     assert area['total'] == sum(area['votes']) and area['leaders'] == summary(area['votes'])['leaders']
 print('PASS: 2006 · official mayoral results and matching boundaries')
+
+for year, total in [('2000', 604394), ('1997', 749897)]:
+    citywide = json.loads((DATA / year / 'results.json').read_text())
+    assert citywide['granularity'] == 'citywide'
+    assert citywide['city']['total'] == total
+    assert citywide['city']['total'] == sum(citywide['city']['votes'])
+    assert not citywide['subdivisions'] and not citywide['wards']
+print('PASS: 1997/2000 · citywide mayoral results')

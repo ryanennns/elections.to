@@ -606,6 +606,10 @@ h3 {
   .reset {
     padding: 9px 11px;
   }
+  .reset,
+  .maplibregl-ctrl-attrib {
+    display: none;
+  }
   .maplibregl-ctrl-top-right {
     right: 4px;
     top: 64px;

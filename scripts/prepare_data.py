@@ -90,6 +90,7 @@ def prepare():
     (output / 'results.json').write_text(json.dumps(results, ensure_ascii=False, separators=(',', ':')))
     for year in [2022, 2018]:
         prepare_historical(year, cache, manifest, output)
+    subprocess.run(['node', ROOT / 'scripts/prepare_early.mjs'], check=True)
     subprocess.run(['node', ROOT / 'scripts/prepare_legacy.mjs'], check=True)
     print('Prepared 2023 election data.')
 

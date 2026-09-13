@@ -13,6 +13,12 @@
     ,"subdivisions-2010.geojson": "https://ckan0.cf.opendata.inter.prod-toronto.ca/dataset/1f5df7fa-8606-4085-b75e-6d658a227558/resource/ea904820-42e0-402f-a744-1995b4b67ac0/download/voting-subdivisions-2010-4326.geojson"
     ,"2006-results.zip": "https://ckan0.cf.opendata.inter.prod-toronto.ca/dataset/96d35404-44d9-49d8-95bb-fb1e5489240d/resource/3fb1227c-a279-4523-a1aa-f00190ba717f/download/2006-results.zip"
     ,"subdivisions-2006.zip": "https://ckan0.cf.opendata.inter.prod-toronto.ca/dataset/1f5df7fa-8606-4085-b75e-6d658a227558/resource/fa84d633-b341-4121-b558-0970c7ea21e2/download/voting-subdivisions-2006.zip"
+    ,"2003-results.zip": "https://ckan0.cf.opendata.inter.prod-toronto.ca/dataset/96d35404-44d9-49d8-95bb-fb1e5489240d/resource/1ed53c9d-a316-465e-96ce-e72be74f8aa9/download/2003-results.zip"
+    ,"subdivisions-2003.geojson": "https://gis.toronto.ca/arcgis/rest/services/cot_geospatial6/FeatureServer/18/query?where=1%3D1&outFields=*&outSR=4326&f=geojson"
+    ,"wards-2003.geojson": "https://gis.toronto.ca/arcgis/rest/services/cot_geospatial6/FeatureServer/38/query?where=1%3D1&outFields=*&outSR=4326&f=geojson"
+    ,"2003-voter-statistics.xls": "https://ckan0.cf.opendata.inter.prod-toronto.ca/dataset/7dc606ab-f042-4d90-99e2-9247cb5953d2/resource/030a7234-7ee0-46a0-94de-3a31fa58352a/download/2003-voter-statistics.xls"
+    ,"2000-results.html": "https://web.archive.org/web/20041029080905id_/http://www.toronto.ca/vote2000/live_final/000.htm"
+    ,"1997-results.html": "https://web.archive.org/web/20030622172104id_/http://www.toronto.ca/elections/results/results_1997.htm"
   },
   "sha256": {
     "mayor.xlsx": "8077b5b94ebd25fb97d34cdeaeeadfb8a8c058d4530c06ab1ad56665a3fe435a",
@@ -28,5 +34,11 @@
     ,"subdivisions-2010.geojson": "1e011bfae69f48a69163d55a70930f1ad60d76a124968658326e5032d16b0c03"
     ,"2006-results.zip": "924289fd4d6401587e806b21e747c285a0171a04279a61c9dc5a48ec30304628"
     ,"subdivisions-2006.zip": "acbebafd85d72535d994f1a20204ae9458bb73a60a411c6d528516412e76e10b"
+    ,"2003-results.zip": "d6f4346f4a8371d4b66db69079ff17f5b39f0559b8513245efb1ffb4cdc442d8"
+    ,"subdivisions-2003.geojson": "c03d597822460a57b9daf1800d3ce8b8486604148a5576ecfeb4865a3874c7fe"
+    ,"wards-2003.geojson": "c78154b515dc07b61b606b45cdca91b0e0b45064f7412554b9280366a11a5942"
+    ,"2003-voter-statistics.xls": "c0f0ce783382dd8de745cb6976fe077569b8ade7bb575a01f9b3a094d1bd2d76"
+    ,"2000-results.html": "513988ddce0949b081f69fd2abf9d35060e156b3136112da111c00a0dda4070b"
+    ,"1997-results.html": "13e763411487de6072198992de706e406467997a997b92e3abe6718466b2bd50"
   }
 }

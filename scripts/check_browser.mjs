@@ -59,6 +59,19 @@ try {
   await page.screenshot({ path: "test-results/2010.png" });
   await chooseElection(page, "2006 · Municipal election");
   await expect(page.locator(".outcome")).toContainText("David Miller elected");
+  await chooseElection(page, "2003 · Municipal election");
+  await expect(page.locator(".total strong")).toHaveText("692,085");
+  await expect(page.locator(".outcome")).toContainText("David Miller elected");
+  await expect(page.locator(".result-scope")).toContainText("699,483 voted");
+  await chooseElection(page, "2000 · Municipal election");
+  await expect(page.locator(".total strong")).toHaveText("604,394");
+  await expect(page.locator(".outcome")).toContainText("Mel Lastman elected");
+  await expect(page.locator(".scope-note")).toHaveText(
+    "Citywide mayoral result · no polling-area data",
+  );
+  await chooseElection(page, "1997 · Municipal election");
+  await expect(page.locator(".total strong")).toHaveText("749,897");
+  await expect(page.locator(".outcome")).toContainText("Mel Lastman elected");
   await chooseElection(page, "2023 · Mayoral by-election");
   await page.waitForTimeout(6000);
   await page.screenshot({ path: "test-results/desktop.png" });
@@ -83,9 +96,8 @@ try {
   });
   mobile.on("pageerror", (error) => errors.push(error.message));
   await mobile.goto(url);
-  await expect(mobile.getByRole("button", { name: "Reset view" })).toBeEnabled({
-    timeout: 30000,
-  });
+  await expect(mobile.locator(".reset")).toBeHidden();
+  await expect(mobile.locator(".maplibregl-ctrl-attrib")).toBeHidden();
   await expect(mobile.locator(".results")).toBeVisible();
   await expect(mobile.locator(".candidate-list li")).toHaveCount(3);
   await expect(mobile.locator("select#election")).toBeVisible();

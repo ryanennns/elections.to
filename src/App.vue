@@ -11,6 +11,7 @@ maplibregl.setWorkerUrl(workerUrl);
 const mapElement = ref(null);
 const data = shallowRef(null);
 const geometry = shallowRef(null);
+const voterStatistics = shallowRef({});
 const elections = shallowRef({});
 const geometries = shallowRef({});
 const election = ref("2023");
@@ -33,6 +34,9 @@ const electionOptions = [
   { value: "2014", label: "2014 · Municipal election" },
   { value: "2010", label: "2010 · Municipal election" },
   { value: "2006", label: "2006 · Municipal election" },
+  { value: "2003", label: "2003 · Municipal election" },
+  { value: "2000", label: "2000 · Municipal election" },
+  { value: "1997", label: "1997 · Municipal election" },
 ];
 let map;
 let mapUpdate;
@@ -41,14 +45,27 @@ const color = candidateColor;
 const number = (n) => n.toLocaleString("en-CA");
 const percent = (votes, total) =>
   total ? `${((votes / total) * 100).toFixed(2)}%` : "—";
-const areas = computed(() => geometry.value?.subdivisions.features || []);
+const areas = computed(() => geometry.value?.subdivisions?.features || []);
 const reportedAreas = computed(
   () => Object.keys(data.value?.subdivisions || {}).length,
+);
+const scopeNote = computed(() =>
+  data.value?.granularity === "citywide"
+    ? "Citywide mayoral result · no polling-area data"
+    : `${number(reportedAreas.value)} reporting areas · Regular election-day polls.`,
 );
 const area = computed(() => areas.value.find((f) => f.id === selected.value));
 const result = computed(() =>
   selected.value ? data.value?.subdivisions[selected.value] : data.value?.city,
 );
+const voterStats = computed(() => {
+  const stats = voterStatistics.value[election.value];
+  return stats
+    ? selected.value
+      ? stats.subdivisions[selected.value]
+      : stats.city
+    : null;
+});
 const ranked = computed(() =>
   result.value
     ? [...data.value.candidates].sort(
@@ -74,8 +91,9 @@ const outcome = computed(() => {
 
 function paint() {
   if (!mapReady.value) return;
-  for (const feature of geometry.value.subdivisions.features) {
-    const r = data.value.subdivisions[feature.id];
+  const citywide = data.value?.granularity === "citywide";
+  for (const feature of geometry.value?.subdivisions?.features || []) {
+    const r = citywide ? data.value.city : data.value.subdivisions[feature.id];
     const id = r?.leaders[0];
     const fill =
       r?.leaders.length > 1
@@ -124,7 +142,12 @@ function chooseElection(value) {
   setBlackOpacity(1);
   mapUpdate = setTimeout(() => {
     if (disposed) return;
-    map.getSource("subdivisions").setData(geometry.value.subdivisions);
+    map
+      .getSource("subdivisions")
+      .setData(geometry.value?.subdivisions || {
+        type: "FeatureCollection",
+        features: [],
+      });
     paint();
     setBlackOpacity(0);
   }, MAP_FADE_DURATION);
@@ -175,6 +198,12 @@ onMounted(async () => {
       oldestSubdivisions,
       originalResults,
       originalSubdivisions,
+      earlyResults,
+      earlySubdivisions,
+      earlyWards,
+      earlyVoterStatistics,
+      citywideResults,
+      firstResults,
     ] = await Promise.all(
       [
         "results.json",
@@ -190,6 +219,12 @@ onMounted(async () => {
         "2010/subdivisions.geojson",
         "2006/results.json",
         "2006/subdivisions.geojson",
+        "2003/results.json",
+        "2003/subdivisions.geojson",
+        "2003/wards.geojson",
+        "2003/voter-statistics.json",
+        "2000/results.json",
+        "1997/results.json",
       ].map((file) => read(base + file)),
     );
     if (disposed) return;
@@ -200,8 +235,12 @@ onMounted(async () => {
       2014: legacyResults,
       2010: oldestResults,
       2006: originalResults,
+      2003: earlyResults,
+      2000: citywideResults,
+      1997: firstResults,
     };
     data.value = results;
+    voterStatistics.value = { 2003: earlyVoterStatistics };
     geometries.value = {
       2023: { subdivisions, wards },
       2022: { subdivisions: historicalSubdivisions, wards },
@@ -209,6 +248,15 @@ onMounted(async () => {
       2014: { subdivisions: legacySubdivisions, wards },
       2010: { subdivisions: oldestSubdivisions, wards },
       2006: { subdivisions: originalSubdivisions, wards },
+      2003: { subdivisions: earlySubdivisions, wards: earlyWards },
+      2000: {
+        subdivisions: earlyWards,
+        wards: earlyWards,
+      },
+      1997: {
+        subdivisions: earlyWards,
+        wards: earlyWards,
+      },
     };
     geometry.value = geometries.value[election.value];
   } catch {
@@ -323,6 +371,7 @@ onMounted(async () => {
           },
         });
         map.on("click", `${group}-fill`, (e) => {
+          if (data.value?.granularity === "citywide") return;
           const id = e.features[0].properties.id;
           selected.value = selected.value === id ? "" : id;
         });
@@ -392,8 +441,7 @@ onUnmounted(() => {
                 @select="chooseElection"
               />
               <p class="scope-note">
-                {{ number(reportedAreas) }} reporting areas · Regular election-day
-                polls.
+                {{ scopeNote }}
               </p>
             </section>
           </Teleport>
@@ -436,6 +484,10 @@ onUnmounted(() => {
                       <strong>{{ number(result.total) }}</strong
                       ><span>valid votes</span>
                     </div>
+                    <p v-if="voterStats" class="result-scope">
+                      {{ number(voterStats.voted) }} voted ·
+                      {{ percent(voterStats.voted, voterStats.eligible) }} turnout
+                    </p>
                     <p v-if="selected" class="result-scope">
                       Regular election-day votes only
                     </p>
