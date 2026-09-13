@@ -565,20 +565,30 @@ h3 {
   .map-frame > .controls .scope-note {
     display: none;
   }
+  .map-frame > .controls .dropdown {
+    border: 1px solid #d7ded2;
+    border-radius: 7px;
+    background: #fbfcf8e8;
+    box-shadow: 0 2px 8px #203b341f;
+    backdrop-filter: blur(8px);
+  }
   .map-frame > .controls .dropdown::after {
     position: absolute;
     top: 50%;
-    right: 0;
+    right: 12px;
     color: #203b34;
     content: "▾";
     pointer-events: none;
     transform: translateY(-50%);
   }
   .map-frame > .controls .dropdown-native {
-    height: auto;
-    padding: 0 20px 0 0;
+    height: 40px;
+    padding: 0 32px 0 12px;
     border: 0;
     background: transparent;
+    color: #203b34;
+    font-size: 13px;
+    font-weight: 700;
     appearance: none;
     -webkit-appearance: none;
   }
@@ -665,6 +675,9 @@ h3 {
       opacity 300ms ease,
       transform 300ms ease;
   }
+  .results-content {
+    position: relative;
+  }
   .results-modal-leave-active {
     transition:
       opacity 180ms ease,
@@ -720,8 +733,8 @@ h3 {
   }
   .outcome .results-toggle {
     position: absolute;
-    top: 14px;
-    right: 14px;
+    top: 0;
+    right: 0;
     display: grid;
     place-items: center;
     width: 28px;
