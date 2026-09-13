@@ -46,33 +46,33 @@ try {
   await page.keyboard.press("Enter");
   await expect(page.locator(".total strong")).toHaveText("551,890");
   await expect(page.locator(".outcome")).toContainText("John Tory elected");
-  await chooseElection(page, "2023 · Mayoral by-election");
+  await chooseElection(page, "2023");
   await expect(page.locator(".total strong")).toHaveText("724,638");
-  await chooseElection(page, "2018 · Municipal election");
+  await chooseElection(page, "2018");
   await expect(page.locator(".total strong")).toHaveText("755,493");
-  await chooseElection(page, "2023 · Mayoral by-election");
-  await chooseElection(page, "2014 · Municipal election");
+  await chooseElection(page, "2023");
+  await chooseElection(page, "2014");
   await expect(page.locator(".outcome")).toContainText("John Tory elected");
-  await chooseElection(page, "2010 · Municipal election");
+  await chooseElection(page, "2010");
   await expect(page.locator(".outcome")).toContainText("Rob Ford elected");
   await page.waitForTimeout(1000);
   await page.screenshot({ path: "test-results/2010.png" });
-  await chooseElection(page, "2006 · Municipal election");
+  await chooseElection(page, "2006");
   await expect(page.locator(".outcome")).toContainText("David Miller elected");
-  await chooseElection(page, "2003 · Municipal election");
+  await chooseElection(page, "2003");
   await expect(page.locator(".total strong")).toHaveText("692,085");
   await expect(page.locator(".outcome")).toContainText("David Miller elected");
   await expect(page.locator(".result-scope")).toContainText("699,483 voted");
-  await chooseElection(page, "2000 · Municipal election");
+  await chooseElection(page, "2000");
   await expect(page.locator(".total strong")).toHaveText("604,394");
   await expect(page.locator(".outcome")).toContainText("Mel Lastman elected");
   await expect(page.locator(".scope-note")).toHaveText(
     "Citywide mayoral result · no polling-area data",
   );
-  await chooseElection(page, "1997 · Municipal election");
+  await chooseElection(page, "1997");
   await expect(page.locator(".total strong")).toHaveText("749,897");
   await expect(page.locator(".outcome")).toContainText("Mel Lastman elected");
-  await chooseElection(page, "2023 · Mayoral by-election");
+  await chooseElection(page, "2023");
   await page.waitForTimeout(6000);
   await page.screenshot({ path: "test-results/desktop.png" });
   const box = await page.locator(".map").boundingBox();
@@ -114,14 +114,8 @@ try {
     Math.round((await mobile.locator(".results").boundingBox()).width),
     320,
   );
-  await expect(reopen).toBeVisible();
-  assert.ok(
-    Math.abs(
-      Math.round(
-        (await reopen.boundingBox()).x + (await reopen.boundingBox()).width,
-      ) - 376,
-    ) <= 1,
-  );
+  await expect(mobile.locator(".results")).toHaveClass(/is-collapsed/);
+  assert.ok(Math.abs(Math.round((await reopen.boundingBox()).x) - 14) <= 1);
   await reopen.click();
   assert.equal(
     await mobile.evaluate(

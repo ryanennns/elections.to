@@ -31,15 +31,15 @@ const TORONTO_BOUNDS = [
   [-78.85, 44.15],
 ];
 const electionOptions = [
-  { value: "2023", label: "2023 · Mayoral by-election" },
-  { value: "2022", label: "2022 · Municipal election" },
-  { value: "2018", label: "2018 · Municipal election" },
-  { value: "2014", label: "2014 · Municipal election" },
-  { value: "2010", label: "2010 · Municipal election" },
-  { value: "2006", label: "2006 · Municipal election" },
-  { value: "2003", label: "2003 · Municipal election" },
-  { value: "2000", label: "2000 · Municipal election" },
-  { value: "1997", label: "1997 · Municipal election" },
+  { value: "2023", label: "2023" },
+  { value: "2022", label: "2022" },
+  { value: "2018", label: "2018" },
+  { value: "2014", label: "2014" },
+  { value: "2010", label: "2010" },
+  { value: "2006", label: "2006" },
+  { value: "2003", label: "2003" },
+  { value: "2000", label: "2000" },
+  { value: "1997", label: "1997" },
 ];
 let map;
 let mapUpdate;
@@ -458,7 +458,10 @@ onUnmounted(() => {
           {{ dataError }} <button @click="reload">Reload</button>
         </div>
         <template v-if="data">
-          <Teleport to=".map-frame" :disabled="!mobile">
+          <Teleport
+            :to="mobile ? '.sidebar-brand' : '.map-frame'"
+            :disabled="!mobile"
+          >
             <section class="controls" aria-label="Map settings">
               <ElectionDropdown
                 id="election"

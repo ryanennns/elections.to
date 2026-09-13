@@ -532,6 +532,9 @@ h3 {
   .sidebar-brand {
     order: 0;
     padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
   .intro {
     padding: 25px 22px 19px;
@@ -552,27 +555,24 @@ h3 {
   .controls {
     padding: 19px 22px;
   }
-  .map-frame > .controls {
-    position: absolute;
-    z-index: 2;
-    top: 14px;
-    left: 14px;
-    width: min(260px, calc(100% - 28px));
+  .sidebar-brand > .controls {
+    flex: 1;
+    min-width: 0;
     padding: 0;
     border: 0;
   }
-  .map-frame > .controls .dropdown-label,
-  .map-frame > .controls .scope-note {
+  .sidebar-brand > .controls .dropdown-label,
+  .sidebar-brand > .controls .scope-note {
     display: none;
   }
-  .map-frame > .controls .dropdown {
+  .sidebar-brand > .controls .dropdown {
     border: 1px solid #d7ded2;
     border-radius: 7px;
     background: #fbfcf8e8;
     box-shadow: 0 2px 8px #203b341f;
     backdrop-filter: blur(8px);
   }
-  .map-frame > .controls .dropdown::after {
+  .sidebar-brand > .controls .dropdown::after {
     position: absolute;
     top: 50%;
     right: 12px;
@@ -581,7 +581,7 @@ h3 {
     pointer-events: none;
     transform: translateY(-50%);
   }
-  .map-frame > .controls .dropdown-native {
+  .sidebar-brand > .controls .dropdown-native {
     height: 40px;
     padding: 0 32px 0 12px;
     border: 0;
@@ -625,8 +625,9 @@ h3 {
     display: none;
   }
   .maplibregl-ctrl-top-right {
-    right: 4px;
-    top: 64px;
+    top: auto;
+    right: 14px;
+    bottom: 14px;
   }
   .legend {
     width: 258px;
@@ -652,8 +653,8 @@ h3 {
   .results {
     position: fixed;
     z-index: 3;
-    left: auto;
-    right: 14px;
+    left: 14px;
+    right: auto;
     bottom: 14px;
     width: min(320px, calc(100vw - 28px));
     max-height: min(62dvh, 460px);
@@ -703,8 +704,8 @@ h3 {
     transition-duration: 180ms;
   }
   .results.is-collapsed {
-    left: auto;
-    right: 14px;
+    left: 14px;
+    right: auto;
     width: auto;
     padding: 0;
     overflow: visible;
@@ -753,6 +754,8 @@ h3 {
     padding-right: 34px;
   }
   .is-collapsed > .results-toggle {
+    right: auto;
+    left: 0;
     margin: 0;
     opacity: 1;
     pointer-events: auto;
