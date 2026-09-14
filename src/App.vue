@@ -27,9 +27,15 @@ const resultsOpening = ref(false);
 const closingSelection = ref("");
 const MAP_FADE_DURATION = 195;
 const TORONTO_BOUNDS = [
-  [-79.9, 43.25],
-  [-78.85, 44.15],
+  [-79.6393, 43.581],
+  [-79.1152, 43.8555],
 ];
+const TORONTO_PAN_BOUNDS = [
+  [-79.7258, 43.5357],
+  [-79.0287, 43.9008],
+];
+const MAP_PADDING = 32;
+const MAP_ZOOM_OUT = Math.log2(0.95);
 const electionOptions = [
   { value: "2023", label: "2023" },
   { value: "2022", label: "2022" },
@@ -136,7 +142,12 @@ function setBlackOpacity(opacity) {
 }
 function resetView() {
   selected.value = "";
-  map?.fitBounds(TORONTO_BOUNDS, { padding: 35, duration: 600 });
+  fitToronto(600);
+}
+function fitToronto(duration) {
+  if (!map) return;
+  const camera = map.cameraForBounds(TORONTO_BOUNDS, { padding: MAP_PADDING });
+  map.easeTo({ ...camera, zoom: camera.zoom + MAP_ZOOM_OUT, duration });
 }
 function reload() {
   window.location.reload();
@@ -299,7 +310,7 @@ onMounted(async () => {
       style,
       center: [-79.38, 43.71],
       zoom: 10,
-      maxBounds: TORONTO_BOUNDS,
+      maxBounds: TORONTO_PAN_BOUNDS,
       maxZoom: 18,
       minZoom: 8,
       renderWorldCopies: false,
@@ -416,7 +427,7 @@ onMounted(async () => {
       });
       mapReady.value = true;
       paint();
-      map.fitBounds(TORONTO_BOUNDS, { padding: 35, duration: 0 });
+      fitToronto(0);
     });
   } catch {
     mapError.value =
