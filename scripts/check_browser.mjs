@@ -123,7 +123,12 @@ try {
   );
   await expect(mobile.locator(".reset")).toBeHidden();
   await expect(mobile.locator(".maplibregl-ctrl-attrib")).toBeHidden();
-  await expect(mobile.locator(".results")).toBeVisible();
+  await expect(mobile.locator(".results-content")).toBeHidden();
+  await expect(mobile.locator(".results")).toHaveClass(/is-collapsed/);
+  const reopen = mobile.getByRole("button", { name: "Results", exact: true });
+  await expect(reopen).toBeVisible();
+  await reopen.click();
+  await expect(mobile.locator(".results-content")).toBeVisible();
   await expect(mobile.locator(".candidate-list li")).toHaveCount(3);
   await expect(mobile.locator("select#election")).toBeVisible();
   const mapFrame = await mobile.locator(".map-frame").boundingBox();
@@ -133,7 +138,6 @@ try {
   await mobile.selectOption("select#election", "2023");
   await expect(mobile.locator(".total strong")).toHaveText("724,638");
   await mobile.getByRole("button", { name: "Hide results" }).click();
-  const reopen = mobile.getByRole("button", { name: "Results", exact: true });
   await mobile.waitForTimeout(90);
   assert.equal(
     Math.round((await mobile.locator(".results").boundingBox()).width),
@@ -169,8 +173,6 @@ try {
     if (desktop) await chooseElection(mobile, year);
     else await mobile.selectOption("select#election", year);
     await mobile.waitForTimeout(400);
-    if (dismiss === "off")
-      await mobile.getByRole("button", { name: "Hide results" }).click();
     const frame = await mobile.locator(".map").boundingBox();
     await mobile.getByRole("button", { name: "Zoom in", exact: true }).click();
     await mobile.waitForTimeout(400);

@@ -246,6 +246,8 @@ function collapseResults() {
 
 onMounted(async () => {
   updateMobile();
+  resultsOpen.value = !mobile.value;
+  resultsCollapsed.value = mobile.value;
   window.addEventListener("resize", updateMobile);
   const stylePromise = read(
     "https://tiles.openfreemap.org/styles/positron",
