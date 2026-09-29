@@ -1,5 +1,13 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  ref,
+  shallowRef,
+  watch,
+} from "vue";
 import { ChevronDown } from "@lucide/vue";
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -10,6 +18,7 @@ import ElectionDropdown from "./components/ElectionDropdown.vue";
 maplibregl.setWorkerUrl(workerUrl);
 
 const mapElement = ref(null);
+const resultsElement = ref(null);
 const data = shallowRef(null);
 const geometry = shallowRef(null);
 const voterStatistics = shallowRef({});
@@ -50,6 +59,7 @@ const electionOptions = [
 ];
 let map;
 let mapUpdate;
+let previousView;
 let disposed = false;
 const color = candidateColor;
 const number = (n) => n.toLocaleString("en-CA");
@@ -142,6 +152,7 @@ function setBlackOpacity(opacity) {
   map.setPaintProperty("subdivisions-black", "fill-opacity", opacity);
 }
 function resetView() {
+  previousView = null;
   selected.value = "";
   fitToronto(600);
 }
@@ -149,6 +160,37 @@ function fitToronto(duration) {
   if (!map) return;
   const camera = map.cameraForBounds(TORONTO_BOUNDS, { padding: MAP_PADDING });
   map.easeTo({ ...camera, zoom: camera.zoom + MAP_ZOOM_OUT, duration });
+}
+function fitSelectedArea() {
+  if (!mapReady.value || !area.value) return;
+  const { type, coordinates } = area.value.geometry;
+  const bounds = new maplibregl.LngLatBounds();
+  for (const point of coordinates.flat(type === "MultiPolygon" ? 2 : 1)) {
+    bounds.extend(point);
+  }
+  const rect = mapElement.value.getBoundingClientRect();
+  const visibleHeight =
+    Math.min(
+      resultsElement.value.getBoundingClientRect().top,
+      (window.innerHeight * 2) / 3,
+    ) - rect.top;
+  if (visibleHeight <= 0) return;
+  previousView ||= {
+    center: map.getCenter(),
+    zoom: map.getZoom(),
+    bearing: map.getBearing(),
+    pitch: map.getPitch(),
+  };
+  map.fitBounds(bounds, {
+    padding: {
+      top: visibleHeight * 0.2,
+      bottom: rect.height - visibleHeight + visibleHeight * 0.2,
+      left: rect.width * 0.2,
+      right: rect.width * 0.2,
+    },
+    duration: 600,
+    linear: true,
+  });
 }
 function reload() {
   window.location.reload();
@@ -435,11 +477,18 @@ onMounted(async () => {
       "The map could not start. Election results remain available.";
   }
 });
-watch(selected, (value, previous) => {
+watch(selected, async (value, previous) => {
   highlight();
-  if (!value && previous && mobile.value) closingSelection.value = previous;
-  if (!mobile.value || resultsOpen.value === Boolean(value)) return;
-  toggleResults();
+  if (!mobile.value) return;
+  if (!value && previous) closingSelection.value = previous;
+  if (resultsOpen.value !== Boolean(value)) toggleResults();
+  if (value) {
+    await nextTick();
+    if (selected.value === value) fitSelectedArea();
+  } else if (previousView) {
+    map.easeTo({ ...previousView, duration: 600 });
+    previousView = null;
+  }
 });
 onUnmounted(() => {
   disposed = true;
@@ -491,6 +540,7 @@ onUnmounted(() => {
           <Teleport to="body" :disabled="!mobile">
             <section
               id="results"
+              ref="resultsElement"
               class="results"
               :class="{
                 'is-closing': !resultsOpen && !resultsCollapsed,
