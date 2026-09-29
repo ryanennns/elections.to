@@ -38,6 +38,12 @@ try {
   await expect(page.getByRole("button", { name: "Reset view" })).toBeEnabled({
     timeout: 30000,
   });
+  await expect(page.getByRole("checkbox", { name: "Auto zoom" })).toBeChecked();
+  const settings = await page.locator(".auto-zoom").boundingBox();
+  const drawer = await page.locator(".sidebar").boundingBox();
+  assert.ok(
+    Math.abs(settings.y + settings.height - drawer.y - drawer.height) <= 1,
+  );
   for (let i = 0; i < 5; i++)
     await page.getByRole("button", { name: "Zoom out", exact: true }).click();
   await page.getByRole("button", { name: "Reset view" }).click();
@@ -112,6 +118,9 @@ try {
     }),
   );
   await mobile.goto(url);
+  await expect(mobile.getByRole("checkbox", { name: "Auto zoom" })).toHaveCount(
+    0,
+  );
   await expect(mobile.locator(".reset")).toBeHidden();
   await expect(mobile.locator(".maplibregl-ctrl-attrib")).toBeHidden();
   await expect(mobile.locator(".results")).toBeVisible();
@@ -145,27 +154,33 @@ try {
   const canvas = mobile.locator(".maplibregl-canvas");
   const screenshotOptions = {
     style:
-      ".results, .maplibregl-control-container { visibility: hidden !important; }",
+      ".results, .map-topline, .maplibregl-control-container { visibility: hidden !important; }",
   };
   for (const [width, height, year, dismiss] of [
     [390, 844, "2023", "close"],
     [375, 667, "2003", "off"],
     [760, 1100, "2023", "unselect"],
+    [1440, 1000, "2023", "unselect"],
   ]) {
+    const desktop = width > 760;
     await mobile.setViewportSize({ width, height });
     await mobile.reload();
     await expect(mobile.locator(".reset")).toBeEnabled({ timeout: 30000 });
-    await mobile.selectOption("select#election", year);
+    if (desktop) await chooseElection(mobile, year);
+    else await mobile.selectOption("select#election", year);
     await mobile.waitForTimeout(400);
     if (dismiss === "off")
       await mobile.getByRole("button", { name: "Hide results" }).click();
     const frame = await mobile.locator(".map").boundingBox();
     await mobile.getByRole("button", { name: "Zoom in", exact: true }).click();
     await mobile.waitForTimeout(400);
-    await mobile.mouse.move(frame.width * 0.5, frame.y + frame.height * 0.3);
+    await mobile.mouse.move(
+      frame.x + frame.width * 0.5,
+      frame.y + frame.height * 0.3,
+    );
     await mobile.mouse.down();
     await mobile.mouse.move(
-      frame.width * 0.5 + 20,
+      frame.x + frame.width * 0.5 + 20,
       frame.y + frame.height * 0.3 - 15,
       { steps: 8 },
     );
@@ -179,9 +194,11 @@ try {
     await expect(mobile.locator(".results h3")).toBeVisible();
     await mobile.waitForTimeout(800);
     const panel = await mobile.locator(".results").boundingBox();
-    const visibleHeight = Math.min(panel.y, (height * 2) / 3) - frame.y;
+    const visibleHeight = desktop
+      ? frame.height
+      : Math.min(panel.y, (height * 2) / 3) - frame.y;
     await mobile.screenshot({
-      path: `test-results/mobile-region-${year}-${width}.png`,
+      path: `test-results/${desktop ? "desktop" : "mobile"}-region-${year}-${width}.png`,
     });
     const png = await canvas.screenshot(screenshotOptions);
     const boundary = await mobile.evaluate(async (base64) => {
@@ -260,17 +277,51 @@ try {
       await mobile.touchscreen.tap(frame.x + 5, frame.y + 5);
     } else {
       await mobile.touchscreen.tap(
-        frame.width / 2,
+        frame.x + frame.width / 2,
         frame.y + visibleHeight / 2,
       );
     }
-    await expect(mobile.locator(".results")).toHaveClass(/is-collapsed/);
+    if (desktop) await expect(mobile.locator(".results h3")).toHaveCount(0);
+    else await expect(mobile.locator(".results")).toHaveClass(/is-collapsed/);
     await mobile.waitForTimeout(800);
     assert.deepEqual(
       await canvas.screenshot(screenshotOptions),
       before,
       `${dismiss} must restore the original map view`,
     );
+    if (desktop) {
+      const autoZoom = mobile.getByRole("checkbox", { name: "Auto zoom" });
+      await expect(autoZoom).toBeChecked();
+      await autoZoom.uncheck();
+      await mobile.mouse.click(
+        frame.x + frame.width * 0.5,
+        frame.y + frame.height * 0.4,
+      );
+      await expect(mobile.locator(".results h3")).toBeVisible();
+      await mobile.waitForTimeout(800);
+      assert.deepEqual(
+        await canvas.screenshot(screenshotOptions),
+        before,
+        "Disabling auto zoom must leave the map view unchanged",
+      );
+      await mobile.mouse.click(
+        frame.x + frame.width * 0.5,
+        frame.y + frame.height * 0.4,
+      );
+      await expect(mobile.locator(".results h3")).toHaveCount(0);
+      await autoZoom.check();
+      await mobile.mouse.click(
+        frame.x + frame.width * 0.5,
+        frame.y + frame.height * 0.4,
+      );
+      await expect(mobile.locator(".results h3")).toBeVisible();
+      await mobile.waitForTimeout(800);
+      assert.notDeepEqual(
+        await canvas.screenshot(screenshotOptions),
+        before,
+        "Re-enabling auto zoom must zoom to the region again",
+      );
+    }
   }
   assert.deepEqual(errors, []);
 

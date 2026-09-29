@@ -31,6 +31,7 @@ const dataError = ref("");
 const mapError = ref("");
 const mapReady = ref(false);
 const mobile = ref(false);
+const autoZoom = ref(true);
 const resultsOpen = ref(true);
 const resultsCollapsed = ref(false);
 const resultsOpening = ref(false);
@@ -162,18 +163,20 @@ function fitToronto(duration) {
   map.easeTo({ ...camera, zoom: camera.zoom + MAP_ZOOM_OUT, duration });
 }
 function fitSelectedArea() {
-  if (!mapReady.value || !area.value) return;
+  if (!mapReady.value || !area.value || (!mobile.value && !autoZoom.value))
+    return;
   const { type, coordinates } = area.value.geometry;
   const bounds = new maplibregl.LngLatBounds();
   for (const point of coordinates.flat(type === "MultiPolygon" ? 2 : 1)) {
     bounds.extend(point);
   }
   const rect = mapElement.value.getBoundingClientRect();
-  const visibleHeight =
-    Math.min(
-      resultsElement.value.getBoundingClientRect().top,
-      (window.innerHeight * 2) / 3,
-    ) - rect.top;
+  const visibleHeight = mobile.value
+    ? Math.min(
+        resultsElement.value.getBoundingClientRect().top,
+        (window.innerHeight * 2) / 3,
+      ) - rect.top
+    : rect.height;
   if (visibleHeight <= 0) return;
   previousView ||= {
     center: map.getCenter(),
@@ -479,9 +482,10 @@ onMounted(async () => {
 });
 watch(selected, async (value, previous) => {
   highlight();
-  if (!mobile.value) return;
-  if (!value && previous) closingSelection.value = previous;
-  if (resultsOpen.value !== Boolean(value)) toggleResults();
+  if (mobile.value) {
+    if (!value && previous) closingSelection.value = previous;
+    if (resultsOpen.value !== Boolean(value)) toggleResults();
+  }
   if (value) {
     await nextTick();
     if (selected.value === value) fitSelectedArea();
@@ -633,6 +637,9 @@ onUnmounted(() => {
             </section>
           </Teleport>
         </template>
+        <label v-if="!mobile" class="auto-zoom">
+          <input v-model="autoZoom" type="checkbox" /> Auto zoom
+        </label>
       </aside>
 
       <section class="map-column" aria-label="Toronto election map">

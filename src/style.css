@@ -81,9 +81,20 @@ main {
   min-height: 100dvh;
 }
 .sidebar {
+  display: flex;
+  flex-direction: column;
   background: #fbfcf8;
   border-right: 1px solid #dde2d8;
   min-width: 0;
+}
+.auto-zoom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding: 24px 28px;
+  font-size: 12px;
+  accent-color: #203b34;
 }
 .sidebar-brand {
   padding: 24px 28px;
