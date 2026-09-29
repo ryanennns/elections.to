@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
+import { ChevronDown } from "@lucide/vue";
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
@@ -521,7 +522,7 @@ onUnmounted(() => {
                       aria-label="Hide results"
                       @click="toggleResults"
                     >
-                      <span aria-hidden="true">⌄</span>
+                      <ChevronDown :size="18" aria-hidden="true" />
                     </button>
                   </p>
                   <template v-if="result">
